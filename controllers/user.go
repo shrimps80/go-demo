@@ -4,6 +4,7 @@ import (
   "fmt"
   "strconv"
   "demo/models"
+  "demo/util"
 	"github.com/astaxie/beego"
   "github.com/astaxie/beego/orm"
 )
@@ -36,7 +37,8 @@ func (this *UserController) Register() {
 	//赋值
 	user.Name = userName
 	//加密用户密码
-  user.PassWord = password
+  //user.PassWord = password
+  user.PassWord = util.SHA256([]byte(password))
 	//插入数据库
 	i, e := o.Insert(&user)
 	if e != nil {
@@ -79,7 +81,7 @@ func (this *UserController) Login() {
 		return
 	}
 	//将用户密码加密
-	user.PassWord=password
+	user.PassWord = util.SHA256([]byte(password))
 	err = o.Read(&user, "PassWord")
 	if err!=nil{
 		beego.Error("密码错误")
