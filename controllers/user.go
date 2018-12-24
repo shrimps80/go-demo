@@ -34,6 +34,12 @@ func (this *UserController) Register() {
 	o := orm.NewOrm()
 	//2.定义用户
 	var user models.User
+  o.QueryTable("User").Filter("Name", userName).One(&user)
+  if user.Id > 0 {
+    beego.Error("用户名已经存在")
+		this.TplName = "register.tpl"
+		return
+  }
 	//赋值
 	user.Name = userName
 	//加密用户密码
