@@ -1,6 +1,8 @@
 package controllers
 
 import (
+  "fmt"
+  "strconv"
   "demo/models"
 	"github.com/astaxie/beego"
   "github.com/astaxie/beego/orm"
@@ -93,6 +95,31 @@ func (this *UserController) Login() {
 	}else {
 		this.Ctx.SetCookie("userName", userName, -1)
 	}
+
+  // 保存下给info使用
+  fmt.Printf("userId: %d\n", user.Id)
+  this.Ctx.SetCookie("userId", strconv.Itoa(user.Id), 60*60*24*7)
 	//this.SetSession("userName",userName)
-	this.Ctx.WriteString("恭喜您,登录成功")
+	// this.Ctx.WriteString("恭喜您,登录成功")
+  this.Redirect("/info",302)
+}
+
+func (this *UserController) Info()  {
+  userId := this.Ctx.GetCookie("userId")
+  fmt.Printf("userId: %d\n", userId)
+
+  o := orm.NewOrm()
+	var user models.User
+  o.QueryTable("User").Filter("Id", userId).One(&user)
+
+  fmt.Printf("userId: %d\n", user.Id)
+  if user.Id == 0 {
+    beego.Error("找不到用户id ----- %d", userId)
+    this.Data["errmsg"]="找不到用户id，重新登录"
+		this.TplName="login.tpl"
+		return
+  }
+
+  this.Data["json"] = user
+  this.Ctx.Output.JSON(this.Data["json"], true, false)
 }
